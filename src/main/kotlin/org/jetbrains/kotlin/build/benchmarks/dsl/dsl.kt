@@ -13,6 +13,7 @@ fun suite(fn: SuiteBuilder.() -> Unit): Suite =
 interface SuiteBuilder {
     fun scenario(name: String, fn: ScenarioBuilder.() -> Unit)
     fun defaultTasks(vararg tasks: Tasks)
+    fun defaultTasks(vararg tasks: String)
     var defaultJdk: String?
     fun changeableFile(name: String): ChangeableFile
     fun defaultArguments(vararg arguments: String)
@@ -40,6 +41,8 @@ interface StepBuilder {
     }
 
     fun runTasks(vararg tasksToRun: Tasks)
+
+    fun runTasks(vararg tasksToRun: String)
 }
 
 interface StepWithFileChangesBuilder : StepBuilder {
@@ -47,7 +50,7 @@ interface StepWithFileChangesBuilder : StepBuilder {
 }
 
 class SuiteBuilderImpl : SuiteBuilder {
-    private var defaultTasks = arrayOf<Tasks>()
+    private var defaultTasks = arrayOf<String>()
     override var defaultJdk: String? = null
     private val scenarios = arrayListOf<Scenario>()
     private val changeableFiles = arrayListOf<ChangeableFile>()
@@ -58,6 +61,10 @@ class SuiteBuilderImpl : SuiteBuilder {
     }
 
     override fun defaultTasks(vararg tasks: Tasks) {
+        defaultTasks = tasks.map { it.path }.toTypedArray()
+    }
+
+    override fun defaultTasks(vararg tasks: String) {
         defaultTasks = arrayOf(*tasks)
     }
 
@@ -125,9 +132,13 @@ class ScenarioBuilderImpl(private val name: String) : ScenarioBuilder {
 abstract class AbstractStepBuilder : StepBuilder {
     override var isMeasured = true
     override var isExpectedToFail = false
-    protected var tasks: Array<Tasks>? = null
+    protected var tasks: Array<String>? = null
 
     override fun runTasks(vararg tasksToRun: Tasks) {
+        this.tasks = tasksToRun.map { it.path }.toTypedArray()
+    }
+
+    override fun runTasks(vararg tasksToRun: String) {
         this.tasks = arrayOf(*tasksToRun)
     }
 }

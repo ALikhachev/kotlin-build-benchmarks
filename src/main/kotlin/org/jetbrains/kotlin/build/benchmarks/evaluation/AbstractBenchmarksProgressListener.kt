@@ -18,7 +18,7 @@ abstract class AbstractBenchmarksProgressListener : BenchmarksProgressListener {
     override fun stepStarted(step: Step) {}
     override fun stepFinished(step: Step, result: Either<StepResult>) {}
     override fun allFinished() {}
-    override fun taskExecutionStarted(tasks: Array<Tasks>) {}
+    override fun taskExecutionStarted(tasks: Array<String>) {}
     override fun cleanupStarted() {}
     override fun cleanupFinished() {}
 }

@@ -9,13 +9,13 @@ import java.io.File
 
 class Suite(
     val scenarios: Array<Scenario>,
-    val defaultTasks: Array<Tasks>,
+    val defaultTasks: Array<String>,
     val changeableFiles: Array<ChangeableFile>,
     val defaultJdk: File?,
     val defaultArguments: Array<String>
 ) {
     fun copy(scenarios: Array<Scenario> = this.scenarios,
-             defaultTasks: Array<Tasks> = this.defaultTasks,
+             defaultTasks: Array<String> = this.defaultTasks,
              changeableFiles: Array<ChangeableFile> = this.changeableFiles,
              defaultJdk: File? = this.defaultJdk,
              defaultArguments: Array<String> = this.defaultArguments) =
@@ -35,19 +35,19 @@ class Scenario(
 sealed class Step {
     abstract val isMeasured: Boolean
     abstract val isExpectedToFail: Boolean
-    abstract val tasks: Array<Tasks>?
+    abstract val tasks: Array<String>?
 
     class SimpleStep(
         override val isMeasured: Boolean,
         override val isExpectedToFail: Boolean,
-        override val tasks: Array<Tasks>?,
+        override val tasks: Array<String>?,
         val fileChanges: Array<FileChange>
     ) : Step()
 
     class RevertLastStep(
         override val isMeasured: Boolean,
         override val isExpectedToFail: Boolean,
-        override val tasks: Array<Tasks>?
+        override val tasks: Array<String>?
     ) : Step()
 }
 

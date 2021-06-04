@@ -85,7 +85,7 @@ abstract class AbstractBenchmarkEvaluator(private val projectPath: File) {
         // ensure tasks in scenario are not affected by previous scenarios
         changesApplier.revertAppliedChanges()
         val tasksToBeRun = scenario.steps.flatMapTo(LinkedHashSet()) { (it.tasks ?: benchmarks.defaultTasks).toList() }
-        tasksToBeRun.remove(Tasks.CLEAN)
+        tasksToBeRun.remove(Tasks.CLEAN.path)
 
         val buildLogsOutputStream = getBuildLogsOutputStream(prevScenario.name, "cleanup", prevIteration)
 
@@ -103,6 +103,6 @@ abstract class AbstractBenchmarkEvaluator(private val projectPath: File) {
     }
 
     protected abstract fun runBuild(suite: Suite, scenario: Scenario, step: Step, buildLogsOutputStream: OutputStream?): Either<StepResult>
-    protected abstract fun runBuild(jdk: File?, tasksToExecute: Array<Tasks>, buildLogsOutputStream: OutputStream?, isExpectedToFail: Boolean = false, arguments: Array<String> = emptyArray()): Either<BuildResult>
+    protected abstract fun runBuild(jdk: File?, tasksToExecute: Array<String>, buildLogsOutputStream: OutputStream?, isExpectedToFail: Boolean = false, arguments: Array<String> = emptyArray()): Either<BuildResult>
 }
 

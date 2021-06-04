@@ -50,9 +50,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
             .mapSuccess { metrics -> StepResult(step, metrics) }
     }
 
-    override fun runBuild(jdk: File?, tasksToExecute: Array<Tasks>, buildLogsOutputStream: OutputStream?, isExpectedToFail: Boolean, arguments: Array<String>): Either<BuildResult> {
-        val tasksPaths = tasksToExecute.map { it.path }.toTypedArray()
-
+    override fun runBuild(jdk: File?, tasksToExecute: Array<String>, buildLogsOutputStream: OutputStream?, isExpectedToFail: Boolean, arguments: Array<String>): Either<BuildResult> {
         val gradleBuildListener = BuildRecordingProgressListener()
         val metricsFile = File.createTempFile("kt-benchmarks-", "-metrics").apply { deleteOnExit() }
         val jvmArguments = mutableListOf<String>()
@@ -64,7 +62,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
         try {
             progress.taskExecutionStarted(tasksToExecute)
             c.newBuild()
-                .forTasks(*tasksPaths)
+                .forTasks(*tasksToExecute)
                 .withArguments("-Pkotlin.internal.single.build.metrics.file=${metricsFile.absolutePath}", *arguments)
                 .setJvmArguments(jvmArguments)
                 .setJavaHome(jdk)

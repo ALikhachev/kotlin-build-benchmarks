@@ -39,7 +39,7 @@ class CompositeBenchmarksProgressListener : BenchmarksProgressListener {
         forEachListener { it.stepFinished(step, result) }
     }
 
-    override fun taskExecutionStarted(tasks: Array<Tasks>) {
+    override fun taskExecutionStarted(tasks: Array<String>) {
         forEachListener { it.taskExecutionStarted(tasks) }
     }
 

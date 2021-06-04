@@ -53,9 +53,9 @@ class SimpleLoggingBenchmarkListener : AbstractBenchmarksProgressListener() {
         p("Step #$stepNum")
     }
 
-    override fun taskExecutionStarted(tasks: Array<Tasks>) {
+    override fun taskExecutionStarted(tasks: Array<String>) {
         withIndent {
-            p("Executing tasks: ${tasks.joinToString(", ") { "'" + it.path + "'" }}")
+            p("Executing tasks: ${tasks.joinToString(", ") { "'$it'" }}")
         }
     }
 

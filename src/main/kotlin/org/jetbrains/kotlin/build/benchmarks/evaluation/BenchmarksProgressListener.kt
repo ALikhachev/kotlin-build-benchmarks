@@ -17,7 +17,7 @@ interface BenchmarksProgressListener {
     fun scenarioFinished(scenario: Scenario, result: Either<ScenarioResult>)
     fun stepStarted(step: Step)
     fun stepFinished(step: Step, result: Either<StepResult>)
-    fun taskExecutionStarted(tasks: Array<Tasks>)
+    fun taskExecutionStarted(tasks: Array<String>)
     fun cleanupStarted()
     fun cleanupFinished()
     fun allFinished()
