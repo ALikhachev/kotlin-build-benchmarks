@@ -8,12 +8,13 @@ plugins {
 }
 
 buildscript {
-    val kotlinVersion = System.getenv("KOTLIN_VERSION") ?: "1.5.255-SNAPSHOT"
+    val kotlinVersion = System.getenv("KOTLIN_VERSION") ?: "1.5.31"
     extra["kotlinVersion"] = kotlinVersion
     val kotlinRepo = "https://buildserver.labs.intellij.net/guestAuth/app/rest/builds/buildType:(id:Kotlin_KotlinDev_CompilerDistAndMavenArtifacts),number:$kotlinVersion,branch:default:any/artifacts/content/maven"
     extra["kotlinRepo"] = kotlinRepo
 
     repositories {
+        mavenCentral()
         mavenLocal()
         maven {
             url = uri(kotlinRepo)
@@ -42,6 +43,7 @@ val kotlinVersion: String by extra
 val kotlinRepo: String by extra
 
 repositories {
+    mavenCentral()
     maven { url = uri("https://repo.gradle.org/gradle/libs-releases") }
     mavenLocal()
     maven {
