@@ -30,7 +30,7 @@ apply {
     plugin("kotlin")
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
         freeCompilerArgs += listOf(
             "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
