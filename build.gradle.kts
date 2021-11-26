@@ -38,7 +38,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
-val toolingApiVersion = "6.2.2"
+val toolingApiVersion = "6.5"
 val kotlinVersion: String by extra
 val kotlinRepo: String by extra
 
