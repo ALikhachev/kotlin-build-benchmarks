@@ -10,6 +10,10 @@ import java.io.File
 fun suite(fn: SuiteBuilder.() -> Unit): Suite =
     SuiteBuilderImpl().apply(fn).build()
 
+@DslMarker
+annotation class BenchmarksDslMarker
+
+@BenchmarksDslMarker
 interface SuiteBuilder {
     fun scenario(name: String, fn: ScenarioBuilder.() -> Unit)
     fun defaultTasks(vararg tasks: Tasks)
@@ -19,6 +23,7 @@ interface SuiteBuilder {
     fun defaultArguments(vararg arguments: String)
 }
 
+@BenchmarksDslMarker
 interface ScenarioBuilder {
     fun step(fn: StepWithFileChangesBuilder.() -> Unit)
     fun revertLastStep(fn: StepBuilder.() -> Unit)
@@ -30,6 +35,7 @@ interface ScenarioBuilder {
     var jdk: String?
 }
 
+@BenchmarksDslMarker
 interface StepBuilder {
     var isMeasured: Boolean
     fun doNotMeasure() {
