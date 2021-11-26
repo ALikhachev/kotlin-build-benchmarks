@@ -8,7 +8,6 @@ package org.jetbrains.kotlin.build.benchmarks.evaluation.gradle
 import org.jetbrains.kotlin.build.benchmarks.dsl.Scenario
 import org.jetbrains.kotlin.build.benchmarks.dsl.Step
 import org.jetbrains.kotlin.build.benchmarks.dsl.Suite
-import org.jetbrains.kotlin.build.benchmarks.dsl.Tasks
 import org.jetbrains.kotlin.build.benchmarks.evaluation.AbstractBenchmarkEvaluator
 import org.jetbrains.kotlin.build.benchmarks.evaluation.BuildResult
 import org.jetbrains.kotlin.build.benchmarks.evaluation.results.MutableMetricsContainer
@@ -20,7 +19,6 @@ import org.jetbrains.kotlin.build.benchmarks.utils.mapSuccess
 import org.jetbrains.kotlin.build.benchmarks.utils.stackTraceString
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
-import org.gradle.tooling.internal.consumer.ConnectorServices
 import org.jetbrains.kotlin.gradle.internal.build.metrics.GradleBuildMetricsData
 import java.io.File
 import java.io.ObjectInputStream
@@ -110,6 +108,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
                 val buildData = ObjectInputStream(metricsFile.inputStream().buffered()).use { input ->
                     input.readObject() as GradleBuildMetricsData
                 }
+                buildData.parentMetric["GRADLE_TASK_ACTION"] = "GRADLE_TASK"
                 addTaskExecutionData(timeMetrics, buildData, gradleBuildListener.taskTimes, gradleBuildListener.javaInstrumentationTimeMs)
             } catch (e: Exception) {
                 System.err.println("Could not read metrics: ${e.stackTraceString()}")
@@ -132,7 +131,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
 
         val taskDataByType = buildData.taskData.values.groupByTo(TreeMap()) { shortTaskTypeName(it.typeFqName) }
         for ((typeFqName, tasksData) in taskDataByType) {
-            val aggregatedTimeNs = LinkedHashMap<String, Long>()
+            val aggregatedTimeMs = LinkedHashMap<String, Long>()
             var timeForTaskType = TimeInterval(0)
             fun replaceRootName(name: String) = if (buildData.parentMetric[name] == null) typeFqName else name
 
@@ -141,18 +140,18 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
 
                 timeForTaskType += taskTimes.getOrElse(taskData.path) { TimeInterval(0) }
 
-                for ((metricName, timeNs) in taskData.timeMetrics) {
-                    if (timeNs <= 0) continue
+                for ((metricName, timeMs) in taskData.timeMetrics) {
+                    if (timeMs <= 0) continue
 
                     // replace root metric name with task type fq name
                     val name = replaceRootName(metricName)
-                    aggregatedTimeNs[name] = aggregatedTimeNs.getOrDefault(name, 0L) + timeNs
+                    aggregatedTimeMs[name] = aggregatedTimeMs.getOrDefault(name, 0L) + timeMs
                 }
             }
             val taskTypeContainer = MutableMetricsContainer<TimeInterval>()
-            for ((metricName, timeNs) in aggregatedTimeNs) {
+            for ((metricName, timeMs) in aggregatedTimeMs) {
                 val parentName = buildData.parentMetric[metricName]?.let { replaceRootName(it) }
-                val value = ValueMetric(TimeInterval.ns(timeNs))
+                val value = ValueMetric(TimeInterval.ms(timeMs))
                 taskTypeContainer.set(metricName, value, parentName)
             }
             if (typeFqName == "JavaCompile") {
