@@ -40,6 +40,11 @@ abstract class AbstractBenchmarkEvaluator(private val projectPath: File) {
 
                     val stepsResults = arrayListOf<StepResult>()
                     for ((stepIndex, step) in scenario.steps.withIndex()) {
+                        if (step is Step.StopDaemon) {
+                            stopDaemons()
+                            continue
+                        }
+
                         progress.stepStarted(step)
 
                         if (!changesApplier.applyStepChanges(step)) {
@@ -102,6 +107,7 @@ abstract class AbstractBenchmarkEvaluator(private val projectPath: File) {
         return buildLogsOutputStreamProvider?.let { it(scenarioName, step, iteration) }
     }
 
+    protected abstract fun stopDaemons()
     protected abstract fun runBuild(suite: Suite, scenario: Scenario, step: Step, buildLogsOutputStream: OutputStream?): Either<StepResult>
     protected abstract fun runBuild(jdk: File?, tasksToExecute: Array<String>, buildLogsOutputStream: OutputStream?, isExpectedToFail: Boolean = false, arguments: Array<String> = emptyArray()): Either<BuildResult>
 }

@@ -55,6 +55,7 @@ fun checkBenchmarks(projectPath: File, benchmarks: Suite) {
                     }
                 }
                 is Step.RevertLastStep -> continue@step
+                is Step.StopDaemon -> continue@step
             }
         }
     }

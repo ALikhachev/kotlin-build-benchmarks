@@ -49,6 +49,12 @@ sealed class Step {
         override val isExpectedToFail: Boolean,
         override val tasks: Array<String>?
     ) : Step()
+
+    class StopDaemon() : Step() {
+        override val isMeasured = false
+        override val isExpectedToFail = false
+        override val tasks = arrayOf<String>()
+    }
 }
 
 data class FileChange(val changeableFile: ChangeableFile, val typeOfChange: TypeOfChange) {

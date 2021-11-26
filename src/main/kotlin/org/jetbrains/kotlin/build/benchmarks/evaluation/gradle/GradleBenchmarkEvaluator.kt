@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.build.benchmarks.utils.mapSuccess
 import org.jetbrains.kotlin.build.benchmarks.utils.stackTraceString
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
+import org.gradle.tooling.internal.consumer.ConnectorServices
 import org.jetbrains.kotlin.gradle.internal.build.metrics.GradleBuildMetricsData
 import java.io.File
 import java.io.ObjectInputStream
@@ -28,18 +29,35 @@ import java.util.*
 import kotlin.collections.LinkedHashMap
 
 class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmarkEvaluator(projectPath) {
+    private lateinit var gradleConnector: GradleConnector
     private lateinit var c: ProjectConnection
     private val heapDumpPath = System.getenv("HEAP_DUMP_PATH")
 
     override fun runBenchmarks(benchmarks: Suite) {
-        val root = projectPath.absoluteFile
-        c = GradleConnector.newConnector().forProjectDirectory(root).connect()
+        initDaemonConnection()
 
         try {
             super.runBenchmarks(benchmarks)
         } finally {
-            c.close()
+            cleanupDaemonConnections()
         }
+    }
+
+    private fun initDaemonConnection() {
+        gradleConnector = GradleConnector.newConnector()
+        val root = projectPath.absoluteFile
+        c = gradleConnector.forProjectDirectory(root).connect()
+    }
+
+    private fun cleanupDaemonConnections() {
+        println("Stopping Gradle daemons...")
+        gradleConnector.disconnect()
+        c.close()
+    }
+
+    override fun stopDaemons() {
+        cleanupDaemonConnections()
+        initDaemonConnection()
     }
 
     override fun runBuild(suite: Suite, scenario: Scenario, step: Step, buildLogsOutputStream: OutputStream?): Either<StepResult> {

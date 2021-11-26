@@ -25,6 +25,7 @@ interface ScenarioBuilder {
     fun expectSlowBuild(reason: String)
     fun arguments(vararg arguments: String)
     fun trackedMetrics(trackedMetrics: Set<String>?)
+    fun stopDaemon()
     var repeat: UByte
     var jdk: String?
 }
@@ -115,6 +116,10 @@ class ScenarioBuilderImpl(private val name: String) : ScenarioBuilder {
 
     override fun revertLastStep(fn: StepBuilder.() -> Unit) {
         steps.add(RevertStepBuilder().apply(fn).build())
+    }
+
+    override fun stopDaemon() {
+        steps.add(Step.StopDaemon())
     }
 
     fun build() =

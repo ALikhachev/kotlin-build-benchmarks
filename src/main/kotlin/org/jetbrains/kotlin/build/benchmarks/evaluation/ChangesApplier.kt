@@ -29,6 +29,10 @@ class ChangesApplier(private val projectPath: File) {
             is Step.RevertLastStep -> {
                 appliedChanges.pollFirst().revert()
             }
+            is Step.StopDaemon -> {
+                // do nothing here
+                true
+            }
         }
     }
 
