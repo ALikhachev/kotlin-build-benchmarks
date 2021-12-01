@@ -29,7 +29,8 @@ class Scenario(
     val repeat: UByte,
     val jdk: File?,
     val arguments: Array<String>?,
-    val trackedMetrics: Set<String>?
+    val trackedMetrics: Set<String>?,
+    val explicitCleanupTasks: Array<String>?,
 )
 
 sealed class Step {

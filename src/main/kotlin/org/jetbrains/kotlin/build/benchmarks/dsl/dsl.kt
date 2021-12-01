@@ -31,6 +31,7 @@ interface ScenarioBuilder {
     fun arguments(vararg arguments: String)
     fun trackedMetrics(trackedMetrics: Set<String>?)
     fun stopDaemon()
+    fun cleanupTasks(vararg taskNames: String)
     var repeat: UByte
     var jdk: String?
 }
@@ -94,6 +95,7 @@ class ScenarioBuilderImpl(private val name: String) : ScenarioBuilder {
     override var jdk: String? = null
     private var trackedMetrics: Set<String>? = null
     private var arguments: MutableList<String>? = null
+    private var cleanupTasks: MutableList<String>? = null
 
     private var expectedSlowBuildReason: String? = null
     override fun expectSlowBuild(reason: String) {
@@ -128,6 +130,14 @@ class ScenarioBuilderImpl(private val name: String) : ScenarioBuilder {
         steps.add(Step.StopDaemon())
     }
 
+    override fun cleanupTasks(vararg taskNames: String) {
+        if (cleanupTasks == null) {
+            cleanupTasks = mutableListOf()
+        }
+        val cleanupTasks = this.cleanupTasks ?: error("Cleanup tasks are set to null")
+        cleanupTasks += taskNames
+    }
+
     fun build() =
         Scenario(
             name = name,
@@ -136,7 +146,8 @@ class ScenarioBuilderImpl(private val name: String) : ScenarioBuilder {
             repeat = repeat,
             jdk = jdk?.let { File(it) },
             arguments = arguments?.toTypedArray(),
-            trackedMetrics = trackedMetrics
+            trackedMetrics = trackedMetrics,
+            explicitCleanupTasks = cleanupTasks?.toTypedArray(),
         )
 }
 
