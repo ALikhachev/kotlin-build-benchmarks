@@ -50,6 +50,8 @@ class CompactResultListener(private val targetFile: File) : AbstractBenchmarksPr
                     gradleT += metrics.findValue("UP_TO_DATE_CHECKS") ?: TimeInterval(0)
                     javaT += metrics.findValue("JavaCompile") ?: TimeInterval(0)
                     kotlinT += metrics.findValue("KotlinCompile") ?: TimeInterval(0)
+                    kotlinT += metrics.findValue("Kotlin2JsCompile") ?: TimeInterval(0)
+                    kotlinT += metrics.findValue("KotlinCompileCommon") ?: TimeInterval(0)
                     otherT += metrics.findValue("NON_COMPILATION_TASKS") ?: TimeInterval(0)
                 }
             }
