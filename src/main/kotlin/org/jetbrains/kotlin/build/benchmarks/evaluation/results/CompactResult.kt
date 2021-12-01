@@ -139,7 +139,7 @@ private class TextTable(vararg columnNames: String) {
 
     fun printTo(sb: StringBuilder) {
         for (row in rows) {
-            sb.appendln()
+            sb.appendLine()
             for ((i, col) in row.withIndex()) {
                 if (i > 0) sb.append("|")
 

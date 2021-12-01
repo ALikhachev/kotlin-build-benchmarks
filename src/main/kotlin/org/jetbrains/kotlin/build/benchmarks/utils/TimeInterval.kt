@@ -7,7 +7,8 @@
 
 package org.jetbrains.kotlin.build.benchmarks.utils
 
-inline class TimeInterval constructor(val asNs: Long) {
+@JvmInline
+value class TimeInterval constructor(val asNs: Long) {
     companion object {
         inline fun ms(ms: Long) = TimeInterval(ms * 1_000_000)
 

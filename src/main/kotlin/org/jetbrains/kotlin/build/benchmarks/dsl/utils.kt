@@ -5,8 +5,10 @@
 
 package org.jetbrains.kotlin.build.benchmarks.dsl
 
+import java.util.*
+
 fun String.constantCaseToCamelCase() =
-    toLowerCase()
+    lowercase()
         .split("_")
-        .mapIndexed { i, part -> if (i == 0) part else part.capitalize() }
+        .mapIndexed { i, part -> if (i == 0) part else part.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() } }
         .joinToString("")

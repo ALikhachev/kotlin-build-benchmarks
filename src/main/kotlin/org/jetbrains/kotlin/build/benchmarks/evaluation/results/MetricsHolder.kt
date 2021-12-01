@@ -105,7 +105,7 @@ class MutableMetricsContainer<T> : MetricsContainer<T>() {
         return newMetrics
     }
 
-    override fun plus(other: MetricsContainer<T>, plusFn: (T, T) -> T): MetricsContainer<T> {
+    override fun plus(other: MetricsContainer<T>, plus: (T, T) -> T): MetricsContainer<T> {
         val newMetrics = MutableMetricsContainer<T>()
 
         for (key in myChildren.keys + other.metricsChildren.keys) {
@@ -121,9 +121,9 @@ class MutableMetricsContainer<T> : MetricsContainer<T>() {
                 otherValue == null -> myValue
                 else -> {
                     if (myValue is ValueMetric && otherValue is ValueMetric) {
-                        ValueMetric(plusFn(myValue.value, otherValue.value))
+                        ValueMetric(plus(myValue.value, otherValue.value))
                     } else if (myValue is MetricsContainer && otherValue is MetricsContainer) {
-                        myValue.plus(otherValue, plusFn)
+                        myValue.plus(otherValue, plus)
                     } else {
                         error("Container cannot be summed with value")
                     }
