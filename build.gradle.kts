@@ -30,14 +30,6 @@ apply {
     plugin("kotlin")
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        freeCompilerArgs += listOf(
-            "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
-        )
-    }
-}
-
 val toolingApiVersion = "6.5"
 val kotlinVersion: String by extra
 val kotlinRepo: String by extra
