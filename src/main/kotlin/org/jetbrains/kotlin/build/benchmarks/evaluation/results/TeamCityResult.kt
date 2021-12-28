@@ -35,6 +35,7 @@ class TeamCityMetricReporter : AbstractBenchmarksProgressListener() {
         when (result) {
             is Either.Success -> {
                 result.mapSuccess {
+                    setParameter("env.br.${specialCharactersToUnderscore(scenario.name)}.display_name", scenario.name)
                     for ((stepIndex, stepResult) in it.stepResults.withIndex()) {
                         if (!stepResult.step.isMeasured) continue
                         var prefix = "";
