@@ -112,6 +112,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
                 addTaskExecutionData(timeMetrics, buildData, gradleBuildListener.taskTimes, gradleBuildListener.javaInstrumentationTimeMs)
             } catch (e: Exception) {
                 System.err.println("Could not read metrics: ${e.stackTraceString()}")
+                return Either.Failure(e)
             } finally {
                 metricsFile.delete()
             }
