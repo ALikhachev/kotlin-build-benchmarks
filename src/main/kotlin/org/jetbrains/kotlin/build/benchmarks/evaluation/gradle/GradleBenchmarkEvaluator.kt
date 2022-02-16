@@ -140,7 +140,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
 
                 timeForTaskType += taskTimes.getOrElse(taskData.path) { TimeInterval(0) }
 
-                for ((metricName, timeMs) in taskData.timeMetrics) {
+                for ((metricName, timeMs) in taskData.buildTimesMs) {
                     if (timeMs <= 0) continue
 
                     // replace root metric name with task type fq name
