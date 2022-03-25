@@ -130,7 +130,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
         var compilationTime = TimeInterval(0)
         var nonCompilationTime = TimeInterval(0)
 
-        val taskDataByType = buildData.taskData.values.groupByTo(TreeMap()) { shortTaskTypeName(it.typeFqName) }
+        val taskDataByType = buildData.buildOperationData.values.groupByTo(TreeMap()) { shortTaskTypeName(it.typeFqName) }
         for ((typeFqName, tasksData) in taskDataByType) {
             val aggregatedTimeMs = LinkedHashMap<String, Long>()
             var timeForTaskType = TimeInterval(0)
