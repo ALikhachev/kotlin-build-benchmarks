@@ -8,7 +8,7 @@ plugins {
 }
 
 buildscript {
-    val kotlinVersion = System.getenv("KOTLIN_VERSION") ?: "1.6.0"
+    val kotlinVersion = System.getenv("KOTLIN_VERSION") ?: "1.7.0-RC"
     extra["kotlinVersion"] = kotlinVersion
     val kotlinRepo = "https://buildserver.labs.intellij.net/guestAuth/app/rest/builds/buildType:(id:Kotlin_KotlinDev_CompilerDistAndMavenArtifacts),number:$kotlinVersion,branch:default:any/artifacts/content/maven"
     extra["kotlinRepo"] = kotlinRepo

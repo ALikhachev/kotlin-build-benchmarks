@@ -8,4 +8,7 @@ package org.jetbrains.kotlin.build.benchmarks.evaluation
 import org.jetbrains.kotlin.build.benchmarks.evaluation.results.MetricsContainer
 import org.jetbrains.kotlin.build.benchmarks.utils.TimeInterval
 
-class BuildResult(val timeMetrics: MetricsContainer<TimeInterval>)
+class BuildResult(
+    val timeMetrics: MetricsContainer<TimeInterval>,
+    val performanceMetrics: MetricsContainer<Long>,
+)

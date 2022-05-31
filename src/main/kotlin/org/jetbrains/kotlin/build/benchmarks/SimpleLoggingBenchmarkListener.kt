@@ -109,16 +109,29 @@ class SimpleLoggingBenchmarkListener : AbstractBenchmarksProgressListener() {
 
     private fun printStepResult(result: StepResult) {
         val timeMetrics = result.buildResult.timeMetrics
+        val performanceMetrics = result.buildResult.performanceMetrics
         val wholeBuild = timeMetrics.getMetric(GradlePhasesMetrics.GRADLE_BUILD.name) as? ValueMetric<TimeInterval>
         val wholeBuildMs = wholeBuild!!.value.asMs.toDouble()
 
-        timeMetrics.walkTimeMetrics(
-            fn = { metric, time ->
-                val percentage = time.asMs.toDouble() / wholeBuildMs * 100
-                if (time.asNs > 0) {
-                    p("$metric: ${time.asMs} ms (${percentage.shortStr}%)")
+        fun reportMetric(metric: String, value: Any) {
+            when (value) {
+                is TimeInterval -> {
+                    val percentage = value.asMs.toDouble() / wholeBuildMs * 100
+                    if (value.asNs > 0) {
+                        p("$metric: ${value.asMs} ms (${percentage.shortStr}%)")
+                    }
                 }
-            },
+                else -> p("$metric: $value")
+            }
+        }
+
+        timeMetrics.walkTimeMetrics(
+            fn = ::reportMetric,
+            onEnter = { indentLevel++ },
+            onExit = { indentLevel-- }
+        )
+        performanceMetrics.walkTimeMetrics(
+            fn = ::reportMetric,
             onEnter = { indentLevel++ },
             onExit = { indentLevel-- }
         )

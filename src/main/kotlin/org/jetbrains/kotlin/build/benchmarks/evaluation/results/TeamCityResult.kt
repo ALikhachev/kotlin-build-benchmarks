@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.build.benchmarks.dsl.Scenario
 import org.jetbrains.kotlin.build.benchmarks.dsl.Step
 import org.jetbrains.kotlin.build.benchmarks.evaluation.AbstractBenchmarksProgressListener
 import org.jetbrains.kotlin.build.benchmarks.utils.Either
+import org.jetbrains.kotlin.build.benchmarks.utils.TimeInterval
 import org.jetbrains.kotlin.build.benchmarks.utils.mapSuccess
 
 class TeamCityMetricReporter : AbstractBenchmarksProgressListener() {
@@ -38,17 +39,34 @@ class TeamCityMetricReporter : AbstractBenchmarksProgressListener() {
                     setParameter("env.br.${specialCharactersToUnderscore(scenario.name)}.display_name", scenario.name)
                     for ((stepIndex, stepResult) in it.stepResults.withIndex()) {
                         if (!stepResult.step.isMeasured) continue
-                        var prefix = "";
+                        var prefix = ""
+
+                        fun reportMetrics(metric: String, value: Any) {
+                            if (value is Number && value.toLong() == 0L) return
+                            fun formatValue(value: Any) = when (value) {
+                                is TimeInterval -> value.asMs.toString()
+                                else -> value.toString()
+                            }
+                            val fullMetricName = "$prefix$metric"
+                            val statisticKey =
+                                specialCharactersToUnderscore("${scenario.name}.iter-${currentScenarioRun + 1}.step-${stepIndex + 1}.$fullMetricName")
+                            if (scenario.trackedMetrics?.contains(fullMetricName) != false) {
+                                setParameter("env.br.$statisticKey", formatValue(value))
+                            }
+                            reportStatistics(statisticKey, formatValue(value))
+                        }
+
                         stepResult.buildResult.timeMetrics.walkTimeMetrics(
-                            fn = { metric, time ->
-                                val fullMetricName = "$prefix$metric"
-                                val statisticKey =
-                                    specialCharactersToUnderscore("${scenario.name}.iter-${currentScenarioRun + 1}.step-${stepIndex + 1}.$fullMetricName")
-                                if (scenario.trackedMetrics?.contains(fullMetricName) != false) {
-                                    setParameter("env.br.$statisticKey", time.asMs.toString())
-                                }
-                                reportStatistics(statisticKey, time.asMs.toString())
+                            fn = ::reportMetrics,
+                            onEnter = {
+                                prefix += "$it."
                             },
+                            onExit = {
+                                prefix = prefix.substring(0, prefix.length - (it.length + 1))
+                            }
+                        )
+                        stepResult.buildResult.performanceMetrics.walkTimeMetrics(
+                            fn = ::reportMetrics,
                             onEnter = {
                                 prefix += "$it."
                             },
