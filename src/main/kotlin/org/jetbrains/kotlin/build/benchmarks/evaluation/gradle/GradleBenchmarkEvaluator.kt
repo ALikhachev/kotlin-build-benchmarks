@@ -5,6 +5,9 @@
 
 package org.jetbrains.kotlin.build.benchmarks.evaluation.gradle
 
+import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.ProjectConnection
+import org.gradle.tooling.model.build.BuildEnvironment
 import org.jetbrains.kotlin.build.benchmarks.dsl.Scenario
 import org.jetbrains.kotlin.build.benchmarks.dsl.Step
 import org.jetbrains.kotlin.build.benchmarks.dsl.Suite
@@ -17,14 +20,11 @@ import org.jetbrains.kotlin.build.benchmarks.utils.Either
 import org.jetbrains.kotlin.build.benchmarks.utils.TimeInterval
 import org.jetbrains.kotlin.build.benchmarks.utils.mapSuccess
 import org.jetbrains.kotlin.build.benchmarks.utils.stackTraceString
-import org.gradle.tooling.GradleConnector
-import org.gradle.tooling.ProjectConnection
 import org.jetbrains.kotlin.gradle.internal.build.metrics.GradleBuildMetricsData
 import java.io.File
 import java.io.ObjectInputStream
 import java.io.OutputStream
 import java.util.*
-import kotlin.collections.LinkedHashMap
 
 class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmarkEvaluator(projectPath) {
     private lateinit var gradleConnector: GradleConnector
@@ -69,7 +69,8 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
     override fun runBuild(jdk: File?, tasksToExecute: Array<String>, buildLogsOutputStream: OutputStream?, isExpectedToFail: Boolean, arguments: Array<String>): Either<BuildResult> {
         val gradleBuildListener = BuildRecordingProgressListener()
         val metricsFile = File.createTempFile("kt-benchmarks-", "-metrics").apply { deleteOnExit() }
-        val jvmArguments = mutableListOf<String>()
+        val env = c.getModel(BuildEnvironment::class.java)
+        val jvmArguments = env.java.jvmArguments
         if (!heapDumpPath.isNullOrEmpty()) {
             jvmArguments += "-XX:HeapDumpPath=${heapDumpPath}"
             jvmArguments += "-XX:+HeapDumpOnOutOfMemoryError"
