@@ -80,7 +80,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
             progress.taskExecutionStarted(tasksToExecute)
             c.newBuild()
                 .forTasks(*tasksToExecute)
-                .withArguments("-Pkotlin.internal.single.build.metrics.file=${metricsFile.absolutePath}", *arguments)
+                .withArguments("-Pkotlin.build.report.output=SINGLE_FILE", "-Pkotlin.build.report.single_file=${metricsFile.absolutePath}", *arguments)
                 .addJvmArguments(jvmArguments)
                 .setJavaHome(jdk)
                 .setStandardOutput(buildLogsOutputStream)
