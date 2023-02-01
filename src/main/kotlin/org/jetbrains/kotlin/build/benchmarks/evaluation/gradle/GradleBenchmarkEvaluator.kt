@@ -141,7 +141,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
             val aggregatedTimeMs = LinkedHashMap<String, Long>()
             val aggregatedPerformanceMetrics = LinkedHashMap<String, Long>()
             var timeForTaskType = TimeInterval(0)
-            fun replaceRootName(name: String) = if (buildData.parentMetric[name] == null) typeFqName else name
+            fun replaceRootName(name: String) = if (buildData.parentMetric[name] == null || buildData.parentMetric[name] == "GRADLE_TASK") typeFqName else name
 
             for (taskData in tasksData) {
                 if (!taskData.didWork) continue
