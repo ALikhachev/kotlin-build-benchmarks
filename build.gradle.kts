@@ -5,41 +5,20 @@ plugins {
     java
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "5.1.0"
-}
-
-buildscript {
-    val kotlinVersion = System.getenv("KOTLIN_VERSION") ?: "1.7.10"
-    extra["kotlinVersion"] = kotlinVersion
-    val kotlinRepo = "https://buildserver.labs.intellij.net/guestAuth/app/rest/builds/buildType:(id:Kotlin_KotlinDev_CompilerDistAndMavenArtifacts),number:$kotlinVersion,branch:default:any/artifacts/content/maven"
-    extra["kotlinRepo"] = kotlinRepo
-
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        maven {
-            url = uri(kotlinRepo)
-        }
-    }
-
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-    }
-}
-
-apply {
-    plugin("kotlin")
+    kotlin("jvm")
 }
 
 val toolingApiVersion = "6.5"
-val kotlinVersion: String by extra
-val kotlinRepo: String by extra
+
+val kotlinVersion = System.getenv("KOTLIN_VERSION") ?: "1.8.10"
+val kotlinTeamCityRepo = "https://buildserver.labs.intellij.net/guestAuth/app/rest/builds/buildType:(id:Kotlin_KotlinDev_CompilerDistAndMavenArtifacts),number:$kotlinVersion,branch:default:any/artifacts/content/maven"
 
 repositories {
     mavenCentral()
     maven { url = uri("https://repo.gradle.org/gradle/libs-releases") }
     mavenLocal()
     maven {
-        url = uri(kotlinRepo)
+        url = uri(kotlinTeamCityRepo)
     }
 }
 
