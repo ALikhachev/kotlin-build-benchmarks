@@ -10,6 +10,7 @@ pluginManagement {
     }
     plugins {
         kotlin("jvm") version kotlinVersion
+        kotlin("plugin.serialization") version kotlinVersion
     }
 }
 rootProject.name = "kotlin-build-benchmarks"
