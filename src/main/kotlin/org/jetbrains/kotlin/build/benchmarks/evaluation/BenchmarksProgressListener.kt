@@ -20,5 +20,6 @@ interface BenchmarksProgressListener {
     fun taskExecutionStarted(tasks: Array<String>)
     fun cleanupStarted()
     fun cleanupFinished()
+    fun startBenchmarks()
     fun allFinished()
 }

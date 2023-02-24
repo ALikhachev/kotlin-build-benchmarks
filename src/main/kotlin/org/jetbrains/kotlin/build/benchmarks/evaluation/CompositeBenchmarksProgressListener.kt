@@ -51,6 +51,10 @@ class CompositeBenchmarksProgressListener : BenchmarksProgressListener {
         forEachListener { it.cleanupFinished() }
     }
 
+    override fun startBenchmarks() {
+        forEachListener { it.startBenchmarks() }
+    }
+
     override fun allFinished() {
         forEachListener { it.allFinished() }
     }

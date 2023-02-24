@@ -29,6 +29,7 @@ abstract class AbstractBenchmarkEvaluator(private val projectPath: File) {
         checkBenchmarks(projectPath, benchmarks)
 
         try {
+            progress.startBenchmarks()
             var prevScenario: Scenario? = null
             var prevIteration: UInt = 1U
             scenario@ for (scenario in benchmarks.scenarios) {
