@@ -34,6 +34,7 @@ interface ScenarioBuilder {
     fun cleanupTasks(vararg taskNames: String)
     var repeat: UByte
     var jdk: String?
+    var k2CompatibleTasks: Set<String>
 }
 
 @BenchmarksDslMarker
@@ -93,6 +94,7 @@ class SuiteBuilderImpl : SuiteBuilder {
 class ScenarioBuilderImpl(private val name: String) : ScenarioBuilder {
     override var repeat: UByte = 1U
     override var jdk: String? = null
+    override var k2CompatibleTasks: Set<String> = emptySet()
     private var trackedMetrics: Set<String>? = null
     private var arguments: MutableList<String>? = null
     private var cleanupTasks: MutableList<String>? = null
@@ -144,6 +146,7 @@ class ScenarioBuilderImpl(private val name: String) : ScenarioBuilder {
             steps = steps.toTypedArray(),
             expectedSlowBuildReason = expectedSlowBuildReason,
             repeat = repeat,
+            k2CompatibleTasks = k2CompatibleTasks,
             jdk = jdk?.let { File(it) },
             arguments = arguments?.toTypedArray(),
             trackedMetrics = trackedMetrics,

@@ -31,6 +31,7 @@ class Scenario(
     val arguments: Array<String>?,
     val trackedMetrics: Set<String>?,
     val explicitCleanupTasks: Array<String>?,
+    val k2CompatibleTasks: Set<String>,
 )
 
 sealed class Step {

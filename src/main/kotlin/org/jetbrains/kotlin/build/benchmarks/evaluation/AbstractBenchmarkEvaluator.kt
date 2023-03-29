@@ -110,7 +110,21 @@ abstract class AbstractBenchmarkEvaluator(private val projectPath: File) {
     }
 
     protected abstract fun stopDaemons()
-    protected abstract fun runBuild(suite: Suite, scenario: Scenario, step: Step, buildLogsOutputStream: OutputStream?): Either<StepResult>
-    protected abstract fun runBuild(jdk: File?, tasksToExecute: Array<String>, buildLogsOutputStream: OutputStream?, isExpectedToFail: Boolean = false, arguments: Array<String> = emptyArray()): Either<BuildResult>
+
+    protected abstract fun runBuild(
+        suite: Suite,
+        scenario: Scenario,
+        step: Step,
+        buildLogsOutputStream: OutputStream?
+    ): Either<StepResult>
+
+    protected abstract fun runBuild(
+        jdk: File?,
+        tasksToExecute: Array<String>,
+        buildLogsOutputStream: OutputStream?,
+        isExpectedToFail: Boolean = false,
+        arguments: Array<String> = emptyArray(),
+        k2CompatibleTasks: Set<String> = emptySet()
+    ): Either<BuildResult>
 }
 

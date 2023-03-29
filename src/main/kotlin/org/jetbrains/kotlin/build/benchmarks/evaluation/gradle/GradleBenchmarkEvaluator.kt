@@ -61,12 +61,20 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
     override fun runBuild(suite: Suite, scenario: Scenario, step: Step, buildLogsOutputStream: OutputStream?): Either<StepResult> {
         val tasksToExecute = step.tasks ?: suite.defaultTasks
         val jdk = scenario.jdk ?: suite.defaultJdk
+        val k2CompatibleTasks = scenario.k2CompatibleTasks
         val arguments = scenario.arguments ?: suite.defaultArguments
-        return runBuild(jdk, tasksToExecute, buildLogsOutputStream, step.isExpectedToFail, arguments)
+        return runBuild(jdk, tasksToExecute, buildLogsOutputStream, step.isExpectedToFail, arguments, k2CompatibleTasks)
             .mapSuccess { metrics -> StepResult(step, metrics) }
     }
 
-    override fun runBuild(jdk: File?, tasksToExecute: Array<String>, buildLogsOutputStream: OutputStream?, isExpectedToFail: Boolean, arguments: Array<String>): Either<BuildResult> {
+    override fun runBuild(
+        jdk: File?,
+        tasksToExecute: Array<String>,
+        buildLogsOutputStream: OutputStream?,
+        isExpectedToFail: Boolean,
+        arguments: Array<String>,
+        k2CompatibleTasks: Set<String>
+    ): Either<BuildResult> {
         val gradleBuildListener = BuildRecordingProgressListener()
         val metricsFile = File.createTempFile("kt-benchmarks-", "-metrics").apply { deleteOnExit() }
         val env = c.getModel(BuildEnvironment::class.java)
@@ -111,7 +119,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
                     input.readObject() as GradleBuildMetricsData
                 }
                 buildData.parentMetric["GRADLE_TASK_ACTION"] = "GRADLE_TASK"
-                addTaskExecutionData(timeMetrics, performanceMetrics, buildData, gradleBuildListener.taskTimes, gradleBuildListener.javaInstrumentationTimeMs)
+                addTaskExecutionData(timeMetrics, performanceMetrics, buildData, gradleBuildListener.taskTimes, gradleBuildListener.javaInstrumentationTimeMs, k2CompatibleTasks)
             } catch (e: Exception) {
                 System.err.println("Could not read metrics: ${e.stackTraceString()}")
                 return Either.Failure(e)
@@ -128,14 +136,15 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
         performanceMetrics: MutableMetricsContainer<Long>,
         buildData: GradleBuildMetricsData,
         taskTimes: Map<String, TimeInterval>,
-        javaInstrumentationTime: TimeInterval
+        javaInstrumentationTime: TimeInterval,
+        k2CompatibleTasks: Set<String>,
     ) {
         var compilationTime = TimeInterval(0)
         var nonCompilationTime = TimeInterval(0)
         val performanceMetricsKey = "Performance metrics"
 
-        val taskDataByType = buildData.buildOperationData.values.groupByTo(TreeMap()) {
-            if (it.typeFqName == "unknown") taskNameFromPath(it.path) else shortTaskTypeName(it.typeFqName)
+        val taskDataByType = buildData.buildOperationData.values.groupByTo(TreeMap()) { operation ->
+            if (operation.typeFqName == "unknown") taskNameFromPath(operation.path) else shortTaskTypeName(operation.typeFqName) + "_K2".takeIf { operation.path in k2CompatibleTasks }.orEmpty()
         }
         for ((typeFqName, tasksData) in taskDataByType) {
             val aggregatedTimeMs = LinkedHashMap<String, Long>()
@@ -170,7 +179,7 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
                 taskTypeTimesContainer.set("Not null instrumentation", ValueMetric(javaInstrumentationTime), "JavaCompile")
             }
 
-            val parentMetric = if (typeFqName in compileTasksTypes) {
+            val parentMetric = if (typeFqName.replace("_K2", "") in compileTasksTypes) {
                 compilationTime += timeForTaskType
                 GradlePhasesMetrics.COMPILATION_TASKS.name
             } else {
@@ -195,7 +204,8 @@ class GradleBenchmarkEvaluator(private val projectPath: File) : AbstractBenchmar
         performanceMetrics.set(performanceMetricsKey, ValueMetric(0))
     }
 
-    private val compileTasksTypes = setOf("JavaCompile", "KotlinCompile", "KotlinCompileCommon", "Kotlin2JsCompile")
+    private val kotlinCompileTasksTypes = setOf("KotlinCompile", "KotlinCompileCommon", "Kotlin2JsCompile")
+    private val compileTasksTypes = kotlinCompileTasksTypes + "JavaCompile"
 
     private fun shortTaskTypeName(fqName: String) =
         fqName.substringAfterLast(".").removeSuffix("_Decorated")
