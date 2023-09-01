@@ -27,6 +27,10 @@ abstract class TeamCityResultReporter : AbstractBenchmarksProgressListener() {
         }
     }
 
+    override fun taskExecutionStarted(tasks: Array<String>) {
+        reportMessage("Executing tasks: ${tasks.joinToString(", ") { "'$it'" }}")
+    }
+
     override fun stepFinished(step: Step, result: Either<StepResult>) {
         when (result) {
             is Either.Success -> {
