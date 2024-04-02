@@ -13,21 +13,22 @@ import org.gradle.tooling.events.configuration.ProjectConfigurationFinishEvent
 import org.gradle.tooling.events.task.TaskFinishEvent
 import org.gradle.tooling.events.test.TestStartEvent
 import java.util.LinkedHashMap
+import java.util.concurrent.atomic.AtomicLong
 
 internal class BuildRecordingProgressListener : ProgressListener {
     private lateinit var firstEvent: ProgressEvent
     private lateinit var lastEvent: ProgressEvent
     private lateinit var lastProjectConfigurationFinishEvent: ProjectConfigurationFinishEvent
     private var firstTestStartEvent: TestStartEvent? = null
-    private var mySnapshotBeforeTaskTimeMs = 0L
-    private var mySnapshotAfterTaskTimeMs = 0L
-    private var myJavaInstrumentationTimeMs = 0L
+    private var mySnapshotBeforeTaskTimeMs = AtomicLong(0)
+    private var mySnapshotAfterTaskTimeMs = AtomicLong(0)
+    private var myJavaInstrumentationTimeMs = AtomicLong(0)
 
     val snapshotBeforeTaskTime: TimeInterval
-        get() = TimeInterval.ms(mySnapshotBeforeTaskTimeMs)
+        get() = TimeInterval.ms(mySnapshotBeforeTaskTimeMs.get())
 
     val snapshotAfterTaskTime: TimeInterval
-        get() = TimeInterval.ms(mySnapshotAfterTaskTimeMs)
+        get() = TimeInterval.ms(mySnapshotAfterTaskTimeMs.get())
 
     val configTime: TimeInterval
         get() = TimeInterval.ms(lastProjectConfigurationFinishEvent.eventTime - firstEvent.eventTime)
@@ -39,7 +40,7 @@ internal class BuildRecordingProgressListener : ProgressListener {
         get() = TimeInterval.ms(lastEvent.eventTime - firstEvent.eventTime)
 
     val javaInstrumentationTimeMs: TimeInterval
-        get() = TimeInterval.ms(myJavaInstrumentationTimeMs)
+        get() = TimeInterval.ms(myJavaInstrumentationTimeMs.get())
 
     val timeToRunFirstTest: TimeInterval?
         get() = firstTestStartEvent?.let { TimeInterval.ms(it.eventTime - firstEvent.eventTime) }
@@ -69,13 +70,13 @@ internal class BuildRecordingProgressListener : ProgressListener {
 
             when {
                 event.displayName.startsWith("Snapshot inputs and outputs before executing task ") -> {
-                    mySnapshotBeforeTaskTimeMs += event.totalTimeMs
+                    mySnapshotBeforeTaskTimeMs.addAndGet(event.totalTimeMs)
                 }
                 event.displayName.startsWith("Snapshot outputs after executing task ") -> {
-                    mySnapshotAfterTaskTimeMs += event.totalTimeMs
+                    mySnapshotAfterTaskTimeMs.addAndGet(event.totalTimeMs)
                 }
                 event.displayName.startsWith("Execute instrument java classes ") -> {
-                    myJavaInstrumentationTimeMs += event.totalTimeMs
+                    myJavaInstrumentationTimeMs.addAndGet(event.totalTimeMs)
                 }
             }
         }
